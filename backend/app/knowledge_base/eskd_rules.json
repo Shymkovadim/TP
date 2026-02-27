@@ -1,0 +1,19 @@
+{
+  "operation_names": {
+    "005": "Токарная",
+    "010": "Сверлильная",
+    "015": "Фрезерная",
+    "020": "Шлифовальная",
+    "025": "Слесарная"
+  },
+  "standard_phrases": {
+    "face_turning": "Подрезать торец, выдержать размер {size} мм",
+    "diameter_turning": "Точить диаметр {diameter} мм на длину {length} мм",
+    "drilling": "Сверлить отверстие Ø{diameter} мм, глубина {depth} мм"
+  },
+  "cutting_params_defaults": {
+    "steel_rough": {"v": 100, "s": 0.3, "t": 2.0},
+    "steel_finish": {"v": 180, "s": 0.15, "t": 0.5},
+    "cast_iron_rough": {"v": 80, "s": 0.4, "t": 2.5}
+  }
+}
