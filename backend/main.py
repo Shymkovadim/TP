@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -7,8 +8,7 @@ from app.parser import parse_free_text
 from app.config import settings
 from app.models import TechProcess
 from app.agent import TechAgent
-from app.excel_generator import ExcelGenerator
-
+from app.pdf_generator import PDFGenerator # Импортируем PDF генератор
 app = FastAPI(title="Tech Process Generator API")
 
 # CORS
@@ -22,7 +22,7 @@ app.add_middleware(
 
 # Инициализация компонентов
 agent = TechAgent()
-excel_gen = ExcelGenerator()
+pdf_gen = PDFGenerator(agent)
 
 
 class ProcessRequest(BaseModel):
@@ -67,31 +67,56 @@ async def analyze_process(request: ProcessRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/api/generate-excel")
-async def generate_excel(request: ProcessRequest, background_tasks: BackgroundTasks):
-    """Генерация Excel файла Time Study"""
+@app.post("/api/generate-pdf")
+async def generate_pdf(request: ProcessRequest):
+    """Генерация PDF файла Time Study"""
     try:
+        print(f"📝 Получен запрос на генерацию PDF...")
+        
+        # Формируем полное описание
+        full_input = []
+        if request.part_name:
+            full_input.append(f"Деталь: {request.part_name}")
+        if request.drawing_number:
+            full_input.append(f"Чертеж: {request.drawing_number}")
+        if request.material:
+            full_input.append(f"Материал: {request.material}")
+        full_input.append(f"Описание обработки:\n{request.description}")
+        
+        full_input_str = "\n".join(full_input)
+        
         # Анализируем описание
-        full_input = f"Деталь: {request.part_name or 'Не указана'}\n"
-        full_input += f"Чертеж: {request.drawing_number or 'Не указан'}\n"
-        full_input += f"Материал: {request.material or 'Не указан'}\n"
-        full_input += f"Описание обработки:\n{request.description}"
+        print("🤖 Анализируем описание...")
+        process = agent.analyze_process(full_input_str, request.material)
+        print(f"✅ Анализ завершен. Операций: {len(process.operations)}")
         
-        process = agent.analyze_process(full_input, request.material)
+        # Генерируем PDF - ВАЖНО: передаем ОБА аргумента!
+        print("📄 Генерируем PDF...")
+        safe_name = request.part_name or "unnamed"
+        safe_name = "".join(c for c in safe_name if c.isalnum() or c in (' ', '-', '_')).strip()
+        safe_name = safe_name.replace(' ', '_')
         
-        # Генерируем Excel
-        filename = f"TimeStudy_{request.part_name or 'unnamed'}.xlsx"
+        filename = f"TimeStudy_{safe_name}.pdf"
         output_path = f"output/{filename}"
         
-        excel_gen.generate(process, output_path)
+        # Создаем папку output если нет
+        os.makedirs("output", exist_ok=True)
+        
+        # Вызываем generate с ОБОИМИ аргументами
+        pdf_gen.generate(process, output_path)
+        print(f"✅ PDF сгенерирован: {output_path}")
         
         return {
             "success": True,
-            "message": "Excel сгенерирован",
-            "file_path": f"/download/{filename}"
+            "message": "PDF сгенерирован",
+            "file_path": f"/download/{filename}",
+            "filename": filename
         }
         
     except Exception as e:
+        print(f"❌ Ошибка: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
