@@ -69,16 +69,18 @@ async def analyze_process(request: ProcessRequest):
 
 @app.post("/api/generate-excel")
 async def generate_excel(request: ProcessRequest, background_tasks: BackgroundTasks):
-    """Генерация Excel-файла"""
+    """Генерация Excel файла Time Study"""
     try:
-        # Анализируем
+        # Анализируем описание
         full_input = f"Деталь: {request.part_name or 'Не указана'}\n"
-        full_input += f"Описание:\n{request.description}"
+        full_input += f"Чертеж: {request.drawing_number or 'Не указан'}\n"
+        full_input += f"Материал: {request.material or 'Не указан'}\n"
+        full_input += f"Описание обработки:\n{request.description}"
         
         process = agent.analyze_process(full_input, request.material)
         
         # Генерируем Excel
-        filename = f"tech_process_{request.part_name or 'unnamed'}.xlsx"
+        filename = f"TimeStudy_{request.part_name or 'unnamed'}.xlsx"
         output_path = f"output/{filename}"
         
         excel_gen.generate(process, output_path)
@@ -95,7 +97,7 @@ async def generate_excel(request: ProcessRequest, background_tasks: BackgroundTa
 
 @app.get("/download/{filename}")
 async def download_file(filename: str):
-    """Скачивание сгенерированного файла"""
+    """Скачивание файла"""
     file_path = f"output/{filename}"
     if os.path.exists(file_path):
         return FileResponse(
@@ -104,12 +106,6 @@ async def download_file(filename: str):
             filename=filename
         )
     raise HTTPException(status_code=404, detail="Файл не найден")
-
-
-@app.get("/api/knowledge/tools")
-async def get_tools():
-    """Получить список инструментов из базы знаний"""
-    return agent.knowledge_base.get("tools", {})
 
 
 @app.get("/api/health")

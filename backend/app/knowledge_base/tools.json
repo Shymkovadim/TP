@@ -1,36 +1,172 @@
 {
-  "turning_tools": [
+  "tools": [
     {
-      "id": "TURN-001",
-      "name": "Резец токарный проходной прямой",
-      "gost": "ГОСТ 18871-73",
-      "material": ["Т15К6", "ВК8", "Т5К10"],
-      "geometry": ["80° ромбический", "90° прямой"],
-      "sizes": ["25x25x150", "20x20x125"],
-      "operations": ["черновое точение", "подрезка торца"],
-      "materials_compatible": ["сталь", "чугун"]
+      "id": "TOOL-001",
+      "holder": "DCLNR 3232P-16",
+      "insert": "CNMM 160612-R3P",
+      "material": "IC8150",
+      "full_designation": "CNMM 160612-R3P IC8150",
+      "description": "Черновая обработка торцевых наружных поверхностей, наружных диаметров, фасонных поверхностей стали",
+      "operation_types": ["подрезка торца", "точение наружное", "черновая"],
+      "materials_compatible": ["сталь", "20ХГНМТА", "40Х", "45", "легированная сталь"],
+      "cutting_params": {
+        "v_min": 180,
+        "v_max": 220,
+        "s_min": 0.3,
+        "s_max": 0.4,
+        "t_min": 1.5,
+        "t_max": 3.0
+      },
+      "geometry": "95° подход, 80° ромб, R1.2",
+      "shank_size": "32x32x170 мм"
+    },
+    {
+      "id": "TOOL-002",
+      "holder": "DWLNR 3232P-08",
+      "insert": "WNMG 080408-WF",
+      "material": "IC8150",
+      "full_designation": "WNMG 080408-WF IC8150",
+      "description": "Чистовая обработка торцевых наружных поверхностей, наружных диаметров стали",
+      "operation_types": ["подрезка торца", "точение наружное", "чистовая"],
+      "materials_compatible": ["сталь", "20ХГНМТА", "40Х", "45", "легированная сталь"],
+      "cutting_params": {
+        "v_min": 220,
+        "v_max": 260,
+        "s_min": 0.15,
+        "s_max": 0.25,
+        "t_min": 0.3,
+        "t_max": 0.8
+      },
+      "geometry": "95° подход, 80° Trigon, R0.8",
+      "shank_size": "32x32x170 мм"
+    },
+    {
+      "id": "TOOL-003",
+      "holder": "A32T PCLNR-12",
+      "insert": "CNMM 120412-R3P",
+      "material": "IC8150",
+      "full_designation": "CNMM 120412-R3P IC8150",
+      "description": "Черновая расточка отверстий, внутренних поверхностей стали",
+      "operation_types": ["расточка", "внутренняя обработка", "черновая"],
+      "materials_compatible": ["сталь", "20ХГНМТА", "40Х", "45", "легированная сталь"],
+      "cutting_params": {
+        "v_min": 160,
+        "v_max": 200,
+        "s_min": 0.25,
+        "s_max": 0.35,
+        "t_min": 1.5,
+        "t_max": 2.5
+      },
+      "geometry": "95° подход, 80° ромб, R1.2",
+      "shank_size": "Ø32 мм (мин. Ø40 мм)"
+    },
+    {
+      "id": "TOOL-004",
+      "holder": "A32S PWLNR-08",
+      "insert": "WNMG 080408-WF",
+      "material": "IC8150",
+      "full_designation": "WNMG 080408-WF IC8150",
+      "description": "Чистовая расточка отверстий, внутренних поверхностей стали",
+      "operation_types": ["расточка", "внутренняя обработка", "чистовая"],
+      "materials_compatible": ["сталь", "20ХГНМТА", "40Х", "45", "легированная сталь"],
+      "cutting_params": {
+        "v_min": 200,
+        "v_max": 240,
+        "s_min": 0.12,
+        "s_max": 0.2,
+        "t_min": 0.3,
+        "t_max": 0.6
+      },
+      "geometry": "95° подход, 80° Trigon, R0.8",
+      "shank_size": "Ø32 мм (мин. Ø40 мм)"
+    },
+    {
+      "id": "TOOL-005",
+      "holder": "MIFHR 12C-10",
+      "insert": "MIFR 10-2.00-1.00",
+      "material": "IC908",
+      "full_designation": "MIFR 10-2.00-1.00 IC908",
+      "description": "Точение торцевых канавок, внутренних канавок, проточка канавок на стали",
+      "operation_types": ["канавки", "проточка", "торцевая обработка"],
+      "materials_compatible": ["сталь", "20ХГНМТА", "нержавеющая сталь", "чугун"],
+      "cutting_params": {
+        "v_min": 80,
+        "v_max": 120,
+        "s_min": 0.05,
+        "s_max": 0.08,
+        "t_min": 0.5,
+        "t_max": 1.0
+      },
+      "geometry": "Ширина 2 мм, R1",
+      "shank_size": "Ø12 мм"
+    },
+    {
+      "id": "TOOL-006",
+      "holder": "DCN 150-075-20R-5D",
+      "insert": "ICP 151",
+      "material": "IC908",
+      "full_designation": "ICP 151 IC908",
+      "description": "Сверление отверстий глубиной до 5xD в стали",
+      "operation_types": ["сверление", "отверстия"],
+      "materials_compatible": ["сталь", "20ХГНМТА", "чугун", "нержавеющая сталь"],
+      "cutting_params": {
+        "v_min": 90,
+        "v_max": 120,
+        "s_min": 0.2,
+        "s_max": 0.3,
+        "t_min": null,
+        "t_max": null
+      },
+      "geometry": "5xD, сменная головка",
+      "shank_size": "Ø20 мм"
+    },
+    {
+      "id": "TOOL-007",
+      "holder": "E45X D08-С16-06",
+      "insert": "SOMT 060204-HQ",
+      "material": "IC908",
+      "full_designation": "SOMT 060204-HQ IC908",
+      "description": "Фасочная обработка, канавки 90°, финишная обработка кромок",
+      "operation_types": ["фаски", "фрезерование", "кромки"],
+      "materials_compatible": ["сталь", "20ХГНМТА", "чугун", "нержавеющая сталь"],
+      "cutting_params": {
+        "v_min": 150,
+        "v_max": 180,
+        "s_min": 0.05,
+        "s_max": 0.1,
+        "t_min": 0.05,
+        "t_max": 0.15
+      },
+      "geometry": "45° фаска, 6 мм пластина",
+      "shank_size": "Ø8 мм"
     }
   ],
-  "drilling_tools": [
+  "auxiliary_tools": [
     {
-      "id": "DRILL-001",
-      "name": "Сверло спиральное",
-      "gost": "ГОСТ 10903-77",
-      "material": ["Р6М5", "Р18"],
-      "diameters": [3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20],
-      "operations": ["сверление", "рассверливание"],
-      "materials_compatible": ["сталь", "чугун", "алюминий"]
+      "id": "AUX-001",
+      "name": "Втулка переходная",
+      "designation": "Ø50-32",
+      "description": "Для установки расточных державок Ø32 в блок Ø50"
+    },
+    {
+      "id": "AUX-002",
+      "name": "Цанга ER32",
+      "designation": "ER32 SPR 19-20",
+      "description": "Для крепления сверлильного и фрезерного инструмента"
+    },
+    {
+      "id": "AUX-003",
+      "name": "Державка для фасочной фрезы",
+      "designation": "SL20-ER32-80L",
+      "description": "Для приводного инструмента, крепление фрез Ø8 мм"
     }
   ],
-  "milling_tools": [
-    {
-      "id": "MILL-001",
-      "name": "Фреза концевая",
-      "gost": "ГОСТ 17025-71",
-      "material": ["Р6М5", "ВК8"],
-      "diameters": [6, 8, 10, 12, 16, 20],
-      "operations": ["фрезерование пазов", "фрезерование плоскостей"],
-      "materials_compatible": ["сталь", "чугун", "алюминий"]
+  "materials": {
+    "20ХГНМТА": {
+      "name": "Сталь 20ХГНМТА",
+      "gost": "ТУ-14-1-5509-2005",
+      "hardness": "156-207 HB",
+      "type": "легированная конструкционная"
     }
-  ]
+  }
 }
