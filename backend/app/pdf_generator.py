@@ -125,7 +125,7 @@ class PDFTimeStudyGenerator:
             table_data.append(["", f"Операция {op.op_number}", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""])
             
             # Установка
-            if op.op_number == "005":
+            if op.op_number == "005" or op.op_number == "001":
                 table_data.append(["", "Установка заготовки в патроне", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "15", "", "", "15"])
                 total_time += 15
             
@@ -242,114 +242,108 @@ class PDFTimeStudyGenerator:
     def _calculate_cutting_length(self, description: str, d_max: float, d_min: float) -> float:
         """
         Рассчитывает длину резания на основе описания перехода.
-        
-        Формулы из Time Study 65115-120-60:
-        - Подрезка торца: Lрез = (D_max - D_min) / 2
-        - Точение наружное: Lрез = длина обрабатываемой поверхности
-        - Расточка: Lрез = глубина отверстия
-        - Канавка: Lрез = ширина канавки
-        - Сверление: Lрез = глубина × кол-во отверстий
         """
         desc_lower = description.lower()
         
-        # 1. Подрезка торца (торцевая обработка)
-        if 'торец' in desc_lower or 'подрезать торец' in desc_lower:
+        # 1. Подрезка торца
+        if 'подрезать торец' in desc_lower or 'подрезка торца' in desc_lower:
             # Lрез = (D_max - D_min) / 2
-            # Пример: "Подрезать торец Ø301.45-0.1 / Ø255±0.1"
-            # Lрез = (306.6 - 250.0) / 2 = 28.3 мм
             if d_max > 0 and d_min > 0:
                 return (d_max - d_min) / 2
-            return 28.3  # Значение по умолчанию из Time Study
+            return 0.0  # Если диаметры не указаны или равны
         
-        # 2. Расточка отверстий
-        elif 'расточить' in desc_lower or 'расточка' in desc_lower:
-            # Ищем глубину из описания или используем значения из Time Study
-            # Примеры:
-            # "Расточить отверстие Ø255±0.1 и фаску 7±0.1 под 15°" → 17.8 мм
-            # "Расточить отверстие Ø201.5 и фаску 3 х 30°" → 34.5 мм
-            
-            # Ищем глубину в описании
-            depth_match = re.search(r'глубин[ауою]\s*(\d+\.?\d*)', desc_lower)
-            if depth_match:
-                return float(depth_match.group(1))
-            
-            # Или определяем по диаметру (из Time Study)
-            if '255' in description and '201.5' not in description:
-                return 17.8  # Глубина расточки Ø255
-            elif '201.5' in description:
-                return 34.5  # Глубина расточки Ø201.5
-            
-            return 20.0  # По умолчанию
-        
-        # 3. Точение наружной поверхности
-        elif 'точить поверхность' in desc_lower or 'точить наружную' in desc_lower:
-            # Ищем длину поверхности в описании
-            # Пример: "Точить поверхность Ø301.45-0.1 на длину 70 мм" → 70.6 мм
-            
+        # 2. Точение наружной поверхности
+        elif 'точить диаметр' in desc_lower or 'точить поверхность' in desc_lower:
+            # Ищем длину в описании: "на длину 88" или "длину 88"
             length_match = re.search(r'на\s+длину\s+(\d+\.?\d*)', desc_lower)
             if length_match:
                 return float(length_match.group(1))
             
-            # Или определяем по контексту (из Time Study)
-            if '301.45' in description:
-                return 70.6  # Длина точения для данной детали
+            # Или просто "длину X"
+            length_match = re.search(r'длину\s+(\d+\.?\d*)', desc_lower)
+            if length_match:
+                return float(length_match.group(1))
             
-            return 30.0  # По умолчанию
+            return 1.0  # По умолчанию
         
-        # 4. Канавки
-        elif 'канавк' in desc_lower:
-            # Ищем ширину или глубину канавки
-            # Пример: "Точить торцевую канавку Ø255 шириной 3.6+0.1 на глубину 0.7±0.05"
+        # 3. Расточка отверстий
+        elif 'расточить' in desc_lower or 'расточка' in desc_lower:
+            # Ищем глубину
+            depth_match = re.search(r'глубин[ауою]\s*(\d+\.?\d*)', desc_lower)
+            if depth_match:
+                return float(depth_match.group(1))
             
+            if '255' in description:
+                return 17.8
+            elif '201.5' in description:
+                return 34.5
+            
+            return 20.0
+        
+        # 4. Центровка/засверливание
+        elif 'зацентровать' in desc_lower or 'центровать' in desc_lower or 'засверливать' in desc_lower:
+            # Ищем глубину: "на глубину 10"
+            depth_match = re.search(r'на\s+глубину\s+(\d+\.?\d*)', desc_lower)
+            if depth_match:
+                return float(depth_match.group(1))
+            
+            depth_match = re.search(r'глубину\s+(\d+\.?\d*)', desc_lower)
+            if depth_match:
+                return float(depth_match.group(1))
+            
+            return 10.0  # По умолчанию
+        
+        # 5. Канавки
+        elif 'канавк' in desc_lower:
             # Для торцевых канавок Lрез = ширина канавки
             width_match = re.search(r'шириной\s+(\d+\.?\d*)', desc_lower)
             if width_match:
                 return float(width_match.group(1))
             
-            # Или глубина канавки
             depth_match = re.search(r'глубин[ауою]\s*(\d+\.?\d*)', desc_lower)
             if depth_match:
                 return float(depth_match.group(1))
             
-            # Из Time Study: канавка Ø255 шириной 3.6 → Lрез = 1.6 мм (фактическая длина резания)
-            if '255' in description:
-                return 1.6
-            
-            return 3.6  # По умолчанию
+            return 1.6
         
-        # 5. Сверление
+        # 6. Сверление
         elif 'сверл' in desc_lower:
             # Ищем количество отверстий и глубину
-            # Пример: "Сверлить 16 отверстий Ø15+0.2 глубиной 34.5 мм"
-            
             count_match = re.search(r'(\d+)\s*отверстий', desc_lower)
             depth_match = re.search(r'глубин[ауою]\s*(\d+\.?\d*)', desc_lower)
             
             if count_match and depth_match:
                 num_holes = int(count_match.group(1))
                 depth = float(depth_match.group(1))
-                return depth * num_holes  # Общая длина = глубина × кол-во
+                return depth * num_holes
             
-            # Из Time Study: 16 отверстий глубиной 34.5 мм → Lрез = 34.5 мм (на одно отверстие)
-            if '15' in description:
-                return 34.5
+            if depth_match:
+                return float(depth_match.group(1))
             
-            return 34.5  # По умолчанию
+            return 34.5
         
-        # 6. Фаски
-        elif 'фаск' in desc_lower:
-            # Ищем размер фаски
-            size_match = re.search(r'(\d+\.?\d*)\s*[×xх]\s*(\d+\.?\d*)', desc_lower)
-            if size_match:
-                return float(size_match.group(1))
+        # 7. Фрезерование/фаски/пазы
+        elif 'фрезер' in desc_lower or 'фаск' in desc_lower or 'паз' in desc_lower:
+            # Ищем длину или глубину
+            length_match = re.search(r'на\s+длину\s+(\d+\.?\d*)', desc_lower)
+            if length_match:
+                return float(length_match.group(1))
             
-            return 7.0  # По умолчанию
+            depth_match = re.search(r'глубиной\s+(\d+\.?\d*)', desc_lower)
+            if depth_match:
+                return float(depth_match.group(1))
+            
+            depth_match = re.search(r'глубин[ауою]\s*(\d+\.?\d*)', desc_lower)
+            if depth_match:
+                return float(depth_match.group(1))
+            
+            return 30.0
         
-        # 7. По умолчанию: половина разницы диаметров
+        # 8. По умолчанию
         else:
             if d_max > 0 and d_min > 0:
                 return (d_max - d_min) / 2
-            return 30.0  # Значение по умолчанию
+            return 30.0
     
     def _create_summary(self, process: TechProcess):
         """Создает секцию итогов с расчетом времени"""
